@@ -1,0 +1,35 @@
+name: Build and Deploy .NET App to IIS
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build-and-deploy:
+    runs-on: self-hosted
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '6.0'
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build project
+      run: dotnet build --configuration Release
+
+    - name: Publish application
+      run: dotnet publish -c Release -o publish
+
+    - name: Deploy to IIS
+      run: |
+        robocopy publish "C:\inetpub\wwwroot" /MIR
+
+    - name: Restart IIS
+      run: |
+        iisreset
